@@ -29,10 +29,11 @@ public class MyHandler implements HttpHandler {
             e.printStackTrace();
         }
 
+        System.err.println("handle - " + response);
         OutputStream outputStream = httpExchange.getResponseBody();
 
         // this line is a must
-        httpExchange.sendResponseHeaders(200, response.length());
+        httpExchange.sendResponseHeaders(200, response.getBytes().length);
 
         outputStream.write(response.getBytes());
         outputStream.flush();
@@ -47,7 +48,6 @@ public class MyHandler implements HttpHandler {
             String id = query.substring(query.indexOf("=") + 1);
 
             // Read the content of the HTML file
-
             MongoDB.start();
 
             List<String> recipeSet = MongoDB.getRecipe(new ObjectId(id));

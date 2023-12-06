@@ -30,7 +30,9 @@ public class MyServer {
 
     // set the context for the server
     //server.createContext("/", new RequestHandler(data));
+    System.err.println("MyServer.java");
     server.createContext("/id", new MyHandler());
+    System.err.println("MyServer.java - created context");
     server.setExecutor(threadPoolExecutor);
     server.start();
 
