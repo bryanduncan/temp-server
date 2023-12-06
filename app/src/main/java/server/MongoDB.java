@@ -33,11 +33,10 @@ public class MongoDB {
     private static String currUser;
 
     // connect to mongoDB
-    public static void start(String user) {
+    public static void start() {
         try {
             mongoClient = MongoClients.create(MongoDB.getURI());
             recipesDB = mongoClient.getDatabase("Recipes");
-            currUser = user;
         }
         catch(Exception e)
         {
@@ -70,8 +69,18 @@ public class MongoDB {
 
     // Retreive recipe from MongoDB
     public static List<String> getRecipe(ObjectId recipeID) {
-        MongoCollection<Document> userCollection = recipesDB.getCollection(currUser);
-        Document recipe = userCollection.find(new Document("_id", recipeID)).first();
+
+        Document recipe = null;
+        for(String db : recipesDB.listCollectionNames())
+        {
+            MongoCollection<Document> collection = recipesDB.getCollection(db);
+            recipe = collection.find(new Document("_id", recipeID)).first();
+            if(recipe != null)
+                break;
+        }
+
+        //MongoCollection<Document> userCollection = recipesDB.getCollection(currUser);
+        //Document recipe = userCollection.find(new Document("_id", recipeID)).first();
         if (recipe != null) {
             String name = (String)recipe.get("name");
             String type = (String)recipe.get("type");
@@ -96,32 +105,18 @@ public class MongoDB {
     // Change recipe on MongoDB
     public static boolean editRecipe(ObjectId id, String name, String type, String ingredients, String directions) {
         MongoCollection<Document> userCollection = recipesDB.getCollection(currUser);
-        Document existingRecipe = userCollection.find(new Document("_id", id)).first();
 
-        //if (existingRecipe != null) {
-            Bson filter = eq("_id", id);
-            Bson newName = set("name", name);
-            Bson newType = set("type", type);
-            Bson newIngredients = set("ingredients", ingredients);
-            Bson newDirections = set("directions", directions);
+        Bson filter = eq("_id", id);
+        Bson newName = set("name", name);
+        Bson newType = set("type", type);
+        Bson newIngredients = set("ingredients", ingredients);
+        Bson newDirections = set("directions", directions);
 
-            Bson updates = combine(newName, newType, newIngredients, newDirections);
-            System.out.println(updates);
-            userCollection.findOneAndUpdate(filter, updates);
+        Bson updates = combine(newName, newType, newIngredients, newDirections);
+        System.out.println(updates);
+        userCollection.findOneAndUpdate(filter, updates);
 
-            return true;
-        /*
-        /}
-        else {
-            Document recipe = new Document("_id", new ObjectId());
-            recipe.append("name", name);
-            recipe.append("type", type);
-            recipe.append("ingredients", ingredients);
-            recipe.append("directions", directions);
-            userCollection.insertOne(recipe);
-            return false;
-        }
-        */
+        return true;
     }
 
     // delete recipe on MongoDB

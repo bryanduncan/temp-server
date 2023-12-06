@@ -17,6 +17,7 @@ WORKDIR /app
 COPY ./app/build/libs/app.jar .
 
 COPY ./app/src/main/java/server/index.html ./index.html
+RUN mkdir images
 EXPOSE 8100
 
 # Run the application
